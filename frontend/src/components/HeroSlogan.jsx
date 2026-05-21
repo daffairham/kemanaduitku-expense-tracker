@@ -5,7 +5,7 @@ export default function HeroSlogan() {
       className="flex flex-col justify-center items-center mx-auto "
     >
       <img
-        src="../public/Logo big.svg"
+        src="/Logo big.svg"
         alt=""
         className="w-72 sm:w-96 md:w-96 lg:w-96 mb-6"
       />
