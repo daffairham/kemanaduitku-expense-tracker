@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import HeroSlogan from "../components/HeroSlogan";
+import Button from "../components/Button";
 
 export default function LandingPage() {
   return (
@@ -12,12 +13,7 @@ export default function LandingPage() {
         <br />
         sekarang!
       </p>
-      <Link
-        to="/daftar"
-        className="bg-[#5BB77B] text-white text-xl px-6 py-3 rounded-full font-medium shadow-lg mb-4 hover:cursor-pointer hover:bg-[#399c5c]"
-      >
-        Daftar Sekarang
-      </Link>
+      <Button label="Daftar Sekarang" />
       <p className="font-light">
         Sudah punya akun?{" "}
         <Link to="/masuk" className="text-[#00B9FD]">

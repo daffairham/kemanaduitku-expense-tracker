@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import HeroSlogan from "../components/HeroSlogan";
+import Button from "../components/Button";
 
 export default function Daftar() {
   return (
@@ -47,12 +48,7 @@ export default function Daftar() {
             />
           </div>
           <div className="flex justify-center">
-            <button
-              type="submit"
-              className="bg-[#5BB77B] text-white text-xl px-6 py-3 rounded-full font-normal shadow-lg hover:cursor-pointer hover:bg-[#399c5c]"
-            >
-              Daftar
-            </button>
+            <Button label="Daftar" />
           </div>
         </form>
         <p className="font-light mt-2.5">

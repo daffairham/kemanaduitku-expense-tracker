@@ -5,6 +5,9 @@ import "./assets/style.css";
 import LandingPage from "./pages/LandingPage";
 import Masuk from "./pages/Masuk";
 import Daftar from "./pages/Daftar";
+import Dashboard from "./pages/Dashboard";
+import TambahTransaksi from "./pages/TambahTransaksi";
+import DaftarTransaksi from "./pages/DaftarTransaksi";
 
 function App() {
   return (
@@ -15,7 +18,11 @@ function App() {
 
       <Route path="/daftar" element={<Daftar />} />
 
-      {/* <Route path="/dashboard" element={<Dashboard />} /> */}
+      <Route path="/dashboard" element={<Dashboard />} />
+
+      <Route path="/tambah-transaksi" element={<TambahTransaksi />} />
+
+      <Route path="/transaksi" element={<DaftarTransaksi />} />
     </Routes>
   );
 }
