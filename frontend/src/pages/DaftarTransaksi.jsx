@@ -1,90 +1,59 @@
-import { useState } from "react";
-import { Search } from "lucide-react";
-import { Pencil, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Search, Pencil, Trash2 } from "lucide-react";
+import axios from "axios";
 import Navbar from "../components/Navbar";
 import TransaksiCard from "../components/TransaksiCard";
-
-const dummyTransaksi = [
-  {
-    t_id: 1,
-    transaction_date: "20-05-2026",
-    type: "income",
-    category: "Gaji",
-    amount: 7500000,
-    description: "Gaji pertamaku",
-  },
-  {
-    t_id: 2,
-    transaction_date: "20-05-2026",
-    type: "expense",
-    category: "Hiburan",
-    amount: 100000,
-    description: "Top-up beli skin",
-  },
-  {
-    t_id: 3,
-    transaction_date: "20-05-2026",
-    type: "expense",
-    category: "Transportasi",
-    amount: 30000,
-    description: "Otw kantor",
-  },
-  {
-    t_id: 4,
-    transaction_date: "20-05-2026",
-    type: "income",
-    category: "Freelance",
-    amount: 300000,
-    description: "Joki akun valo",
-  },
-  {
-    t_id: 5,
-    transaction_date: "20-05-2026",
-    type: "income",
-    category: "Freelance",
-    amount: 300000,
-    description: "Joki akun valo",
-  },
-];
+import EditModal from "../components/EditModal";
 
 const kategoriOptions = [
-  "Kategori",
+  "Semua",
   "Gaji",
-  "Hiburan",
-  "Transportasi",
-  "Freelance",
   "Makanan",
+  "Transportasi",
+  "Hiburan",
+  "Kesehatan",
+  "Pendidikan",
+  "Lainnya",
 ];
 
+//convert int ke rupiah
 function formatRupiah(amount) {
-  return "Rp. " + amount.toLocaleString("id-ID");
+  return "Rp. " + Number(amount).toLocaleString("id-ID");
 }
 
-function TransaksiRow({ transaksi }) {
+function TransaksiRow({ transaksi, onDelete, onEdit }) {
   const isIncome = transaksi.type === "income";
   return (
     <tr className="border-b border-gray-200 last:border-0">
       <td className="py-4 pr-4 text-sm text-gray-700 whitespace-nowrap">
-        {transaksi.transaction_date}
+        {transaksi.transaction_date?.split("T")[0]}
       </td>
       <td
-        className={`py-4 pr-4 text-sm font-medium whitespace-nowrap ${isIncome ? "text-[#5BB77B]" : "text-orange-400"}`}
+        className={`py-4 pr-4 text-sm font-semibold whitespace-nowrap ${isIncome ? "text-[#5BB77B]" : "text-orange-400"}`}
       >
         {isIncome ? "Pemasukkan" : "Pengeluaran"}
       </td>
-      <td className="py-4 pr-4 text-sm text-gray-700">{transaksi.category}</td>
+      <td className="py-4 pr-4 text-sm font-medium text-gray-800">
+        {transaksi.category}
+      </td>
       <td className="py-4 pr-4 text-sm text-gray-700 whitespace-nowrap">
         {formatRupiah(transaksi.amount)}
       </td>
-      <td className="py-4 pr-4 text-sm text-gray-700 max-w-xs truncate">
+      <td className="py-4 pr-4 text-sm text-gray-500 max-w-xs truncate">
         {transaksi.description}
       </td>
       <td className="py-4 text-sm">
         <div className="flex items-center gap-4">
-          <button className="text-gray-600 hover:text-blue-600 transition-colors cursor-pointer">
+          <button
+            onClick={() => onEdit(transaksi)}
+            className="text-gray-600 hover:text-[#5BB77B] transition-colors cursor-pointer"
+          >
             <Pencil className="h-4 w-4" />
           </button>
-          <button className="text-gray-600 hover:text-red-500 transition-colors cursor-pointer">
+          <button
+            onClick={() => onDelete(transaksi.t_id)}
+            className="text-gray-600 hover:text-red-500 transition-colors cursor-pointer"
+          >
             <Trash2 className="h-4 w-4" />
           </button>
         </div>
@@ -94,22 +63,65 @@ function TransaksiRow({ transaksi }) {
 }
 
 export default function DaftarTransaksi() {
-  const [search, setSearch] = useState("");
-  const [filterTipe, setFilterTipe] = useState("Tipe");
-  const [filterKategori, setFilterKategori] = useState("Kategori");
+  const [transaksi, setTransaksi] = useState([]); //state untuk data transaksi
+  const [loading, setLoading] = useState(true); //state untuk loading
+  const [search, setSearch] = useState(""); //state untuk search bar
+  const [filterTipe, setFilterTipe] = useState("Semua"); //state filter tipe
+  const [filterKategori, setFilterKategori] = useState("Semua"); //state filter kategori
+  const [selectedTransaksi, setSelectedTransaksi] = useState(null); //state untuk modal edit
 
-  const filtered = dummyTransaksi.filter((t) => {
+  //ambil data transaksi dari db
+  useEffect(() => {
+    fetchTransaksi();
+  }, []);
+
+  async function fetchTransaksi() {
+    try {
+      const res = await axios.get("/api/transactions", {
+        withCredentials: true,
+      });
+      setTransaksi(res.data.getUserTrx);
+    } catch (error) {
+      console.error("Gagal fetch transaksi:", error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  //fungsi buat delete transaksi
+  async function handleDelete(id) {
+    try {
+      await axios.delete(`/api/transactions/${id}`, { withCredentials: true });
+      setTransaksi(transaksi.filter((t) => t.t_id !== id));
+    } catch (error) {
+      console.error("Gagal hapus transaksi:", error);
+    }
+  }
+
+  function handleEdit(transaksi) {
+    setSelectedTransaksi(transaksi);
+  }
+
+  function handleCloseModal() {
+    setSelectedTransaksi(null);
+  }
+
+  function handleEditSuccess() {
+    fetchTransaksi();
+  }
+
+  const filtered = transaksi.filter((t) => {
     const matchSearch =
       t.category.toLowerCase().includes(search.toLowerCase()) ||
       t.description.toLowerCase().includes(search.toLowerCase());
 
     const matchTipe =
-      filterTipe === "Tipe" ||
+      filterTipe === "Semua" ||
       (filterTipe === "Pemasukkan" && t.type === "income") ||
       (filterTipe === "Pengeluaran" && t.type === "expense");
 
     const matchKategori =
-      filterKategori === "Kategori" || t.category === filterKategori;
+      filterKategori === "Semua" || t.category === filterKategori;
 
     return matchSearch && matchTipe && matchKategori;
   });
@@ -140,7 +152,7 @@ export default function DaftarTransaksi() {
             onChange={(e) => setFilterTipe(e.target.value)}
             className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#5BB77B]/40 cursor-pointer"
           >
-            <option>Tipe</option>
+            <option>Semua</option>
             <option>Pemasukkan</option>
             <option>Pengeluaran</option>
           </select>
@@ -156,48 +168,73 @@ export default function DaftarTransaksi() {
           </select>
         </div>
 
-        {filtered.length === 0 && (
-          <p className="text-center text-sm text-gray-400 py-12">
+        {loading ? (
+          <p className="text-sm text-gray-400 text-center py-12">
+            Memuat transaksi...
+          </p>
+        ) : filtered.length === 0 ? (
+          <p className="text-sm text-gray-400 text-center py-12">
             Ga ada transaksi yang cocok.
           </p>
+        ) : (
+          <>
+            <div className="md:hidden flex flex-col gap-3">
+              {filtered.map((t) => (
+                <TransaksiCard
+                  key={t.t_id}
+                  transaksi={t}
+                  showActions={true}
+                  onDelete={handleDelete}
+                  onEdit={handleEdit}
+                />
+              ))}
+            </div>
+
+            <table className="hidden md:table w-full">
+              <thead>
+                <tr className="border-b border-gray-300">
+                  <th className="pb-3 pr-4 text-left text-sm font-medium text-gray-500">
+                    Tanggal
+                  </th>
+                  <th className="pb-3 pr-4 text-left text-sm font-medium text-gray-500">
+                    Tipe
+                  </th>
+                  <th className="pb-3 pr-4 text-left text-sm font-medium text-gray-500">
+                    Kategori
+                  </th>
+                  <th className="pb-3 pr-4 text-left text-sm font-medium text-gray-500">
+                    Jumlah
+                  </th>
+                  <th className="pb-3 pr-4 text-left text-sm font-medium text-gray-500">
+                    Deskripsi
+                  </th>
+                  <th className="pb-3 text-left text-sm font-medium text-gray-500">
+                    Aksi
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((t) => (
+                  <TransaksiRow
+                    key={t.t_id}
+                    transaksi={t}
+                    onDelete={handleDelete}
+                    onEdit={handleEdit}
+                  />
+                ))}
+              </tbody>
+            </table>
+          </>
         )}
-
-        <div className="md:hidden flex flex-col gap-3">
-          {filtered.map((t) => (
-            <TransaksiCard key={t.t_id} transaksi={t} showActions={true} />
-          ))}
-        </div>
-
-        <table className="hidden md:table w-full">
-          <thead>
-            <tr className="border-b border-gray-300">
-              <th className="pb-3 pr-4 text-left text-sm font-medium text-gray-500">
-                Tanggal
-              </th>
-              <th className="pb-3 pr-4 text-left text-sm font-medium text-gray-500">
-                Tipe
-              </th>
-              <th className="pb-3 pr-4 text-left text-sm font-medium text-gray-500">
-                Kategori
-              </th>
-              <th className="pb-3 pr-4 text-left text-sm font-medium text-gray-500">
-                Jumlah
-              </th>
-              <th className="pb-3 pr-4 text-left text-sm font-medium text-gray-500">
-                Deskripsi
-              </th>
-              <th className="pb-3 text-left text-sm font-medium text-gray-500">
-                Aksi
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((t) => (
-              <TransaksiRow key={t.t_id} transaksi={t} />
-            ))}
-          </tbody>
-        </table>
       </main>
+
+      {selectedTransaksi && (
+        <EditModal
+          transaksi={selectedTransaksi}
+          onClose={handleCloseModal}
+          onSuccess={handleEditSuccess}
+        />
+      )}
     </div>
   );
 }

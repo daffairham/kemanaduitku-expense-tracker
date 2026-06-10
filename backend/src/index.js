@@ -12,7 +12,12 @@ const authRoutes = require("./routes/authRoutes");
 const trxRoutes = require("./routes/transactionRoutes");
 const homeRoutes = require("./routes/homeRoutes");
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:8000",
+    credentials: true,
+  }),
+);
 app.use(express.json());
 app.use(cookieParser());
 
@@ -24,7 +29,7 @@ app.get("/", (req, res) => {
   res.send("API jalan");
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = 5000;
 
 app.listen(PORT, () => {
   console.log(`Server jalan di PORT ${PORT}`);

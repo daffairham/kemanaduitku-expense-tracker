@@ -1,8 +1,48 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 import HeroSlogan from "../components/HeroSlogan";
 import Button from "../components/Button";
 
 export default function Masuk() {
+  const navigate = useNavigate();
+
+  const [formData, setFormData] = useState({
+    email: "",
+    sandi: "",
+  });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  function handleChange(e) {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      await axios.post(
+        "/api/auth/login",
+        {
+          email: formData.email,
+          password: formData.sandi,
+        },
+        { withCredentials: true },
+      );
+
+      navigate("/dashboard");
+    } catch (err) {
+      setError(
+        err.response?.data?.message || "Login gagal. Silakan coba lagi.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="flex flex-col lg:flex-row justify-center items-center min-h-screen max-w-6xl mx-auto px-6 gap-4">
       <HeroSlogan />
@@ -16,15 +56,17 @@ export default function Masuk() {
           </p>
         </div>
 
-        <form>
+        <form onSubmit={handleSubmit}>
           <div className="flex flex-col items-start">
             <label htmlFor="email">E-mail</label>
             <input
               id="email"
               name="email"
               type="email"
-              placeholder=""
-              className="w-full bg-white px-4 py-2 rounded-lg border border-[#9A9896] focus:border-[#5BB77B] mb-2"
+              value={formData.email}
+              onChange={handleChange}
+              className="w-full bg-white px-4 py-2 rounded-lg border border-[#9A9896] focus:border-[#5BB77B] mb-4"
+              required
             />
           </div>
           <div className="flex flex-col items-start">
@@ -33,14 +75,26 @@ export default function Masuk() {
               id="sandi"
               name="sandi"
               type="password"
-              placeholder=""
+              value={formData.sandi}
+              onChange={handleChange}
               className="w-full bg-white px-4 py-2 rounded-lg border border-[#9A9896] focus:border-[#5BB77B] mb-4"
+              required
             />
           </div>
+
+          {error && (
+            <p className="text-red-500 text-sm text-center mb-3">{error}</p>
+          )}
+
           <div className="flex justify-center">
-            <Button label="Masuk" />
+            <Button
+              type="submit"
+              label={loading ? "Memproses..." : "Masuk"}
+              disabled={loading}
+            />
           </div>
         </form>
+
         <p className="font-light mt-2.5">
           Belum punya akun?{" "}
           <Link to="/daftar" className="text-[#00B9FD]">

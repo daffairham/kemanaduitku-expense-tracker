@@ -10,8 +10,8 @@ const userRegister = async (req, res) => {
 
     const emailExists = await auth.findUserByEmail(email);
     if (emailExists) {
-      return res.json({
-        message: "The email you entered is already registered.",
+      return res.status(401).json({
+        message: "Email yang kamu masukkan sudah terdaftar.",
       });
     }
 
@@ -19,7 +19,7 @@ const userRegister = async (req, res) => {
 
     const inputUser = await auth.createUser(name, email, hashedPassword);
 
-    return res.json({ message: "Account has been created.", inputUser });
+    return res.json({ message: "Akun berhasil dibuat.", inputUser });
   } catch (error) {
     return res.json({ message: error.message });
   }
@@ -32,13 +32,15 @@ const userLogin = async (req, res) => {
   const userCredentials = await auth.findUserByEmail(userEmail);
 
   if (!userCredentials) {
-    return res.json({ message: "Account does not exist." });
+    return res.status(401).json({ message: "Akun tidak terdaftar." });
   }
 
   const isMatch = await bcrypt.compare(inputtedPass, userCredentials.password);
 
   if (!isMatch) {
-    return res.json({ message: "Incorrect password. Please try again." });
+    return res.status(401).json({
+      message: "Password yang kamu masukkan salah. Silakan coba lagi.",
+    });
   }
   const token = jwt.generateToken({
     id: userCredentials.id,
@@ -55,7 +57,27 @@ const userLogin = async (req, res) => {
   });
 };
 
+const userLogout = (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: false,
+    sameSite: "strict",
+  });
+  return res.json({ message: "Logged out." });
+};
+
+const getMe = async (req, res) => {
+  try {
+    const user = await auth.findUserById(req.user.id);
+    return res.json({ id: user.id, name: user.name, email: user.email });
+  } catch (error) {
+    return res.status(401).json({ message: error.message });
+  }
+};
+
 module.exports = {
   userRegister,
   userLogin,
+  userLogout,
+  getMe,
 };

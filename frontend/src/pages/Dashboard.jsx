@@ -1,58 +1,11 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
 import Navbar from "../components/Navbar";
 import TransaksiCard from "../components/TransaksiCard";
 
-const dummySummary = {
-  balance: 8070000,
-  totalPemasukkan: 8100000,
-  totalPengeluaran: 30000,
-};
-
-const dummyTransaksi = [
-  {
-    t_id: 1,
-    transaction_date: "20-05-2026",
-    type: "income",
-    category: "Gaji",
-    amount: 7500000,
-    description: "Gaji pertamaku",
-  },
-  {
-    t_id: 2,
-    transaction_date: "20-05-2026",
-    type: "expense",
-    category: "Hiburan",
-    amount: 100000,
-    description: "Top-up beli skin",
-  },
-  {
-    t_id: 3,
-    transaction_date: "20-05-2026",
-    type: "expense",
-    category: "Transportasi",
-    amount: 30000,
-    description: "Otw kantor",
-  },
-  {
-    t_id: 4,
-    transaction_date: "20-05-2026",
-    type: "income",
-    category: "Freelance",
-    amount: 300000,
-    description: "Joki akun valo",
-  },
-  {
-    t_id: 5,
-    transaction_date: "20-05-2026",
-    type: "income",
-    category: "Freelance",
-    amount: 300000,
-    description: "Joki akun valo",
-  },
-];
-
 function formatRupiah(amount) {
-  return "Rp. " + amount.toLocaleString("id-ID");
+  return "Rp. " + Number(amount).toLocaleString("id-ID");
 }
 
 function SummaryCard({ label, amount, bgColor }) {
@@ -68,26 +21,61 @@ function TransaksiRow({ transaksi }) {
   const isIncome = transaksi.type === "income";
   return (
     <tr className="border-b border-gray-200 last:border-0">
-      <td className="py-3 pr-4 text-sm text-gray-700 whitespace-nowrap">
-        {transaksi.transaction_date}
+      <td className="py-4 pr-4 text-sm text-gray-700 whitespace-nowrap">
+        {transaksi.transaction_date?.split("T")[0]}
       </td>
       <td
-        className={`py-3 pr-4 text-sm font-medium whitespace-nowrap ${isIncome ? "text-[#5BB77B]" : "text-orange-400"}`}
+        className={`py-4 pr-4 text-sm font-semibold whitespace-nowrap ${isIncome ? "text-[#5BB77B]" : "text-orange-400"}`}
       >
         {isIncome ? "Pemasukkan" : "Pengeluaran"}
       </td>
-      <td className="py-3 pr-4 text-sm text-gray-700">{transaksi.category}</td>
-      <td className="py-3 pr-4 text-sm text-gray-700 whitespace-nowrap">
+      <td className="py-4 pr-4 text-sm font-medium text-gray-800">
+        {transaksi.category}
+      </td>
+      <td className="py-4 pr-4 text-sm text-gray-700 whitespace-nowrap">
         {formatRupiah(transaksi.amount)}
       </td>
-      <td className="py-3 text-sm text-gray-700">{transaksi.description}</td>
+      <td className="py-4 pr-4 text-sm text-gray-500 max-w-xs truncate">
+        {transaksi.description}
+      </td>
     </tr>
   );
 }
 
 export default function Dashboard() {
-  // Ambil 5 transaksi terakhir
-  const recentTransaksi = dummyTransaksi.slice(0, 5);
+  const [transaksi, setTransaksi] = useState([]);
+  const [summary, setSummary] = useState({
+    balance: 0,
+    totalIncome: 0,
+    totalExpense: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const [trxRes, summaryRes] = await Promise.all([
+          axios.get("/api/transactions", { withCredentials: true }),
+          axios.get("/api/transactions/summary", { withCredentials: true }),
+        ]);
+
+        setTransaksi(trxRes.data.getUserTrx);
+        setSummary({
+          balance: summaryRes.data.balance,
+          totalIncome: summaryRes.data.totalIncome.total_income,
+          totalExpense: summaryRes.data.totalExpense.total_expense,
+        });
+      } catch (error) {
+        console.error("Gagal fetch data:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchData();
+  }, []);
+
+  const recentTransaksi = transaksi.slice(0, 5);
 
   return (
     <div className="min-h-screen bg-[#EDECEA]">
@@ -98,26 +86,24 @@ export default function Dashboard() {
           DASHBOARD
         </h1>
 
-        {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <SummaryCard
             label="Balance"
-            amount={dummySummary.balance}
+            amount={summary.balance}
             bgColor="bg-[#4DD9E6]"
           />
           <SummaryCard
             label="Total Pemasukkan"
-            amount={dummySummary.totalPemasukkan}
+            amount={summary.totalIncome}
             bgColor="bg-[#7EE84A]"
           />
           <SummaryCard
             label="Total Pengeluaran"
-            amount={dummySummary.totalPengeluaran}
+            amount={summary.totalExpense}
             bgColor="bg-[#F5D04A]"
           />
         </div>
 
-        {/* Riwayat Transaksi */}
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-base md:text-lg font-semibold text-gray-800">
@@ -131,40 +117,54 @@ export default function Dashboard() {
             </Link>
           </div>
 
-          {/* Mobile — cards */}
-          <div className="md:hidden flex flex-col gap-3">
-            {recentTransaksi.map((t) => (
-              <TransaksiCard key={t.t_id} transaksi={t} showActions={false} />
-            ))}
-          </div>
+          {loading ? (
+            <p className="text-sm text-gray-400 text-center py-8">
+              Memuat transaksi...
+            </p>
+          ) : recentTransaksi.length === 0 ? (
+            <p className="text-sm text-gray-400 text-center py-8">
+              Belum ada transaksi.
+            </p>
+          ) : (
+            <>
+              <div className="md:hidden flex flex-col gap-3">
+                {recentTransaksi.map((t) => (
+                  <TransaksiCard
+                    key={t.t_id}
+                    transaksi={t}
+                    showActions={false}
+                  />
+                ))}
+              </div>
 
-          {/* Desktop — tabel */}
-          <table className="hidden md:table w-full">
-            <thead>
-              <tr className="border-b border-gray-300">
-                <th className="pb-2 pr-4 text-left text-sm font-medium text-gray-500">
-                  Tanggal
-                </th>
-                <th className="pb-2 pr-4 text-left text-sm font-medium text-gray-500">
-                  Tipe
-                </th>
-                <th className="pb-2 pr-4 text-left text-sm font-medium text-gray-500">
-                  Kategori
-                </th>
-                <th className="pb-2 pr-4 text-left text-sm font-medium text-gray-500">
-                  Jumlah
-                </th>
-                <th className="pb-2 text-left text-sm font-medium text-gray-500">
-                  Deskripsi
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {recentTransaksi.map((t) => (
-                <TransaksiRow key={t.t_id} transaksi={t} />
-              ))}
-            </tbody>
-          </table>
+              <table className="hidden md:table w-full">
+                <thead>
+                  <tr className="border-b border-gray-300">
+                    <th className="pb-3 pr-4 text-left text-sm font-medium text-gray-500">
+                      Tanggal
+                    </th>
+                    <th className="pb-3 pr-4 text-left text-sm font-medium text-gray-500">
+                      Tipe
+                    </th>
+                    <th className="pb-3 pr-4 text-left text-sm font-medium text-gray-500">
+                      Kategori
+                    </th>
+                    <th className="pb-3 pr-4 text-left text-sm font-medium text-gray-500">
+                      Jumlah
+                    </th>
+                    <th className="pb-3 pr-4 text-left text-sm font-medium text-gray-500">
+                      Deskripsi
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentTransaksi.map((t) => (
+                    <TransaksiRow key={t.t_id} transaksi={t} />
+                  ))}
+                </tbody>
+              </table>
+            </>
+          )}
 
           <div className="mt-4 text-right">
             <Link

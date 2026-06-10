@@ -1,5 +1,6 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { LayoutDashboard, List, Plus, LogOut } from "lucide-react";
+import axios from "axios";
 
 const navItems = [
   {
@@ -22,7 +23,17 @@ const navItems = [
   },
 ];
 
-export default function Navbar({ activePage, username = "User", onLogout }) {
+export default function Navbar({ activePage, username = "User" }) {
+  const navigate = useNavigate();
+
+  async function handleLogout() {
+    try {
+      await axios.post("/api/auth/logout", {}, { withCredentials: true });
+    } catch (err) {
+    } finally {
+      navigate("/masuk");
+    }
+  }
   return (
     <>
       {/* DESKTOP NAVBAR */}
@@ -53,7 +64,7 @@ export default function Navbar({ activePage, username = "User", onLogout }) {
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-700">Halo, {username}!</span>
           <button
-            onClick={onLogout}
+            onClick={handleLogout}
             className="bg-red-500 hover:bg-red-800 cursor-pointer transition-colors text-white p-2 rounded-lg"
           >
             <LogOut className="h-4 w-4" />
@@ -85,7 +96,7 @@ export default function Navbar({ activePage, username = "User", onLogout }) {
           </Link>
         ))}
         <button
-          onClick={onLogout}
+          onClick={handleLogout}
           className="flex flex-col items-center gap-1 text-red-500"
         >
           <LogOut className="h-5 w-5" />

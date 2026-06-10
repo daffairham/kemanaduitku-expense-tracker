@@ -1,8 +1,44 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 import HeroSlogan from "../components/HeroSlogan";
 import Button from "../components/Button";
 
 export default function Daftar() {
+  const navigate = useNavigate();
+
+  const [formData, setFormData] = useState({
+    nama: "",
+    email: "",
+    sandi: "",
+  });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  function handleChange(e) {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      await axios.post("/api/auth/register", {
+        name: formData.nama,
+        email: formData.email,
+        password: formData.sandi,
+      });
+
+      navigate("/masuk");
+    } catch (err) {
+      setError(err.response?.data?.message || "Registrasi gagal. Coba lagi.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="flex flex-col lg:flex-row justify-center items-center min-h-screen max-w-6xl mx-auto px-6 gap-4">
       <HeroSlogan />
@@ -16,14 +52,15 @@ export default function Daftar() {
           </p>
         </div>
 
-        <form>
+        <form onSubmit={handleSubmit}>
           <div className="flex flex-col justify-center items-start">
             <label htmlFor="nama">Masukkan nama kamu</label>
             <input
               id="nama"
               name="nama"
               type="text"
-              placeholder=""
+              value={formData.nama}
+              onChange={handleChange}
               className="w-full bg-white px-4 py-2 rounded-lg border border-[#9A9896] focus:border-[#5BB77B] mb-2"
             />
           </div>
@@ -33,7 +70,8 @@ export default function Daftar() {
               id="email"
               name="email"
               type="email"
-              placeholder=""
+              value={formData.email}
+              onChange={handleChange}
               className="w-full bg-white px-4 py-2 rounded-lg border border-[#9A9896] focus:border-[#5BB77B] mb-2"
             />
           </div>
@@ -43,14 +81,25 @@ export default function Daftar() {
               id="sandi"
               name="sandi"
               type="password"
-              placeholder=""
+              value={formData.sandi}
+              onChange={handleChange}
               className="w-full bg-white px-4 py-2 rounded-lg border border-[#9A9896] focus:border-[#5BB77B] mb-4"
             />
           </div>
+
+          {error && (
+            <p className="text-red-500 text-sm text-center mb-3">{error}</p>
+          )}
+
           <div className="flex justify-center">
-            <Button label="Daftar" />
+            <Button
+              type="submit"
+              label={loading ? "Memproses..." : "Daftar"}
+              disabled={loading}
+            />
           </div>
         </form>
+
         <p className="font-light mt-2.5">
           Sudah punya akun?{" "}
           <Link to="/masuk" className="text-[#00B9FD]">
