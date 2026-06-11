@@ -44,8 +44,6 @@ git clone https://github.com/daffairham/kemanaduitku-expense-tracker
 ## Rencana Improvement Aplikasi
 - Visualisasi Data
 - Analisis bulanan
-- UI responsif untuk mobile
-- Menampilkan transaksi dengan filter
 
 
 ## Live Link
