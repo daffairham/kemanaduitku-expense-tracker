@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { LayoutDashboard, List, Plus, LogOut } from "lucide-react";
 import axios from "axios";
@@ -23,9 +24,24 @@ const navItems = [
   },
 ];
 
-export default function Navbar({ activePage, username = "User" }) {
+export default function Navbar({ activePage }) {
   const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  useEffect(() => {
+    async function fetchUser() {
+      try {
+        const res = await axios.get("/api/auth/me", {
+          withCredentials: true,
+        });
 
+        setUser(res.data);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    fetchUser();
+  }, []);
   async function handleLogout() {
     try {
       await axios.post("/api/auth/logout", {}, { withCredentials: true });
@@ -40,8 +56,7 @@ export default function Navbar({ activePage, username = "User" }) {
       <nav className="hidden md:flex items-center justify-between px-6 py-4 ">
         <Link
           to="/"
-          className="text-[#5BB77B] font-black text-xl tracking-tight"
-        >
+          className="text-[#5BB77B] font-black text-xl tracking-tight">
           KEMANADUITKU
         </Link>
 
@@ -54,19 +69,19 @@ export default function Navbar({ activePage, username = "User" }) {
                 activePage === item.page
                   ? "text-[#5BB77B] underline underline-offset-4"
                   : "text-gray-800 hover:text-[#5BB77B]"
-              }`}
-            >
+              }`}>
               {item.label}
             </Link>
           ))}
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-700">Halo, {username}!</span>
+          <span className="text-sm text-gray-700">
+            Halo, {user?.name || "User"}!
+          </span>
           <button
             onClick={handleLogout}
-            className="bg-red-500 hover:bg-red-800 cursor-pointer transition-colors text-white p-2 rounded-lg"
-          >
+            className="bg-red-500 hover:bg-red-800 cursor-pointer transition-colors text-white p-2 rounded-lg">
             <LogOut className="h-4 w-4" />
           </button>
         </div>
@@ -87,8 +102,7 @@ export default function Navbar({ activePage, username = "User" }) {
             to={item.to}
             className={`flex flex-col items-center gap-1 transition-colors ${
               activePage === item.page ? "text-[#5BB77B]" : "text-gray-500"
-            }`}
-          >
+            }`}>
             {item.icon}
             <span className="text-xs font-medium">
               {item.label.split(" ")[0]}
@@ -97,8 +111,7 @@ export default function Navbar({ activePage, username = "User" }) {
         ))}
         <button
           onClick={handleLogout}
-          className="flex flex-col items-center gap-1 text-red-500"
-        >
+          className="flex flex-col items-center gap-1 text-red-500">
           <LogOut className="h-5 w-5" />
           <span className="text-xs font-medium">Keluar</span>
         </button>

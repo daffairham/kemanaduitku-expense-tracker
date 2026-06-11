@@ -5,7 +5,6 @@ import Navbar from "../components/Navbar";
 
 const kategoriOptions = [
   "Gaji",
-  "Freelance",
   "Makanan",
   "Transportasi",
   "Hiburan",
@@ -81,14 +80,11 @@ export default function TambahTransaksi() {
 
         <form
           onSubmit={handleSubmit}
-          className="max-w-lg mx-auto bg-white p-6 rounded-xl shadow-sm"
-        >
-          {/* Tanggal */}
+          className="max-w-lg mx-auto bg-white p-6 rounded-xl shadow-sm">
           <div className="mb-4">
             <label
               htmlFor="tanggal"
-              className="block text-gray-700 font-medium mb-2"
-            >
+              className="block text-gray-700 font-medium mb-2">
               Tanggal Transaksi
             </label>
             <input
@@ -104,8 +100,7 @@ export default function TambahTransaksi() {
           <div className="mb-4">
             <label
               htmlFor="tipe"
-              className="block text-gray-700 font-medium mb-2"
-            >
+              className="block text-gray-700 font-medium mb-2">
               Tipe
             </label>
             <select
@@ -113,20 +108,16 @@ export default function TambahTransaksi() {
               name="tipe"
               value={formData.tipe}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 cursor-pointer focus:ring-[#5BB77B] bg-white"
-            >
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 cursor-pointer focus:ring-[#5BB77B] bg-white">
               <option value="">Pilih tipe transaksi</option>
               <option value="income">Pemasukkan</option>
               <option value="expense">Pengeluaran</option>
             </select>
           </div>
-
-          {/* Kategori */}
           <div className="mb-4">
             <label
               htmlFor="kategori"
-              className="block text-gray-700 font-medium mb-2"
-            >
+              className="block text-gray-700 font-medium mb-2">
               Kategori
             </label>
             <select
@@ -134,8 +125,7 @@ export default function TambahTransaksi() {
               name="kategori"
               value={formData.kategori}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none cursor-pointer focus:ring-2 focus:ring-[#5BB77B] bg-white"
-            >
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none cursor-pointer focus:ring-2 focus:ring-[#5BB77B] bg-white">
               <option value="">Pilih kategori</option>
               {kategoriOptions.map((k) => (
                 <option key={k} value={k}>
@@ -144,13 +134,10 @@ export default function TambahTransaksi() {
               ))}
             </select>
           </div>
-
-          {/* Jumlah */}
           <div className="mb-4">
             <label
               htmlFor="jumlah"
-              className="block text-gray-700 font-medium mb-2"
-            >
+              className="block text-gray-700 font-medium mb-2">
               Jumlah
             </label>
             <input
@@ -164,13 +151,10 @@ export default function TambahTransaksi() {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5BB77B]"
             />
           </div>
-
-          {/* Deskripsi */}
           <div className="mb-6">
             <label
               htmlFor="deskripsi"
-              className="block text-gray-700 font-medium mb-2"
-            >
+              className="block text-gray-700 font-medium mb-2">
               Deskripsi{" "}
               <span className="text-gray-400 font-normal">(opsional)</span>
             </label>
@@ -185,7 +169,6 @@ export default function TambahTransaksi() {
             />
           </div>
 
-          {/* Error */}
           {error && (
             <p className="text-red-500 text-sm text-center mb-4">{error}</p>
           )}
@@ -193,8 +176,7 @@ export default function TambahTransaksi() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#5BB77B] hover:bg-[#399c5c] transition-colors text-white font-medium py-2 rounded-lg shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-          >
+            className="w-full bg-[#5BB77B] hover:bg-[#399c5c] transition-colors text-white font-medium py-2 rounded-lg shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
             {loading ? "Menyimpan..." : "Tambah Transaksi"}
           </button>
         </form>

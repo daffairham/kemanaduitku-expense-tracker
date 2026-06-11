@@ -1,9 +1,20 @@
 const db = require("../config/database");
 
 const getTransactions = async (userId) => {
-  const query = `SELECT t_id, type, category, amount, description, transaction_date
+  const query = `SELECT t_id, type, category, amount, description, transaction_date::date::text
     FROM transactions
-    WHERE user_id = $1`;
+    WHERE user_id = $1
+    ORDER BY transaction_date DESC`;
+
+  const res = await db.query(query, [userId]);
+  return res.rows;
+};
+
+const getTransactionsAsc = async (userId) => {
+  const query = `SELECT t_id, type, category, amount, description, transaction_date::date::text
+    FROM transactions
+    WHERE user_id = $1
+    ORDER BY transaction_date ASC`;
 
   const res = await db.query(query, [userId]);
   return res.rows;
@@ -97,6 +108,7 @@ const getTotalExpense = async (userId) => {
 
 module.exports = {
   getTransactions,
+  getTransactionsAsc,
   inputTransaction,
   deleteTransaction,
   updateTransaction,

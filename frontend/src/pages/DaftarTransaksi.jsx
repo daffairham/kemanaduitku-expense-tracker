@@ -1,9 +1,16 @@
 import { useEffect, useState } from "react";
-import { Search, Pencil, Trash2 } from "lucide-react";
+import {
+  Search,
+  Pencil,
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import axios from "axios";
 import Navbar from "../components/Navbar";
 import TransaksiCard from "../components/TransaksiCard";
 import EditModal from "../components/EditModal";
+import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
 
 const kategoriOptions = [
   "Semua",
@@ -16,9 +23,17 @@ const kategoriOptions = [
   "Lainnya",
 ];
 
+const ITEMS_PER_PAGE = 10;
+
 //convert int ke rupiah
 function formatRupiah(amount) {
   return "Rp. " + Number(amount).toLocaleString("id-ID");
+}
+
+function formatTanggal(dateStr) {
+  if (!dateStr) return "";
+  const [year, month, day] = dateStr.slice(0, 10).split("-");
+  return `${day}-${month}-${year}`;
 }
 
 function TransaksiRow({ transaksi, onDelete, onEdit }) {
@@ -26,11 +41,10 @@ function TransaksiRow({ transaksi, onDelete, onEdit }) {
   return (
     <tr className="border-b border-gray-200 last:border-0">
       <td className="py-4 pr-4 text-sm text-gray-700 whitespace-nowrap">
-        {transaksi.transaction_date?.split("T")[0]}
+        {formatTanggal(transaksi.transaction_date)}
       </td>
       <td
-        className={`py-4 pr-4 text-sm font-semibold whitespace-nowrap ${isIncome ? "text-[#5BB77B]" : "text-orange-400"}`}
-      >
+        className={`py-4 pr-4 text-sm font-semibold whitespace-nowrap ${isIncome ? "text-[#5BB77B]" : "text-orange-400"}`}>
         {isIncome ? "Pemasukkan" : "Pengeluaran"}
       </td>
       <td className="py-4 pr-4 text-sm font-medium text-gray-800">
@@ -46,14 +60,12 @@ function TransaksiRow({ transaksi, onDelete, onEdit }) {
         <div className="flex items-center gap-4">
           <button
             onClick={() => onEdit(transaksi)}
-            className="text-gray-600 hover:text-[#5BB77B] transition-colors cursor-pointer"
-          >
+            className="text-gray-600 hover:text-[#5BB77B] transition-colors cursor-pointer">
             <Pencil className="h-4 w-4" />
           </button>
           <button
-            onClick={() => onDelete(transaksi.t_id)}
-            className="text-gray-600 hover:text-red-500 transition-colors cursor-pointer"
-          >
+            onClick={() => onDelete(transaksi)}
+            className="text-gray-600 hover:text-red-500 transition-colors cursor-pointer">
             <Trash2 className="h-4 w-4" />
           </button>
         </div>
@@ -69,11 +81,18 @@ export default function DaftarTransaksi() {
   const [filterTipe, setFilterTipe] = useState("Semua"); //state filter tipe
   const [filterKategori, setFilterKategori] = useState("Semua"); //state filter kategori
   const [selectedTransaksi, setSelectedTransaksi] = useState(null); //state untuk modal edit
+  const [deleteTransaksi, setDeleteTransaksi] = useState(null); //state untuk modal confirm delete
+  const [currentPage, setCurrentPage] = useState(1); // state untuk pagination
 
   //ambil data transaksi dari db
   useEffect(() => {
     fetchTransaksi();
   }, []);
+
+  // reset ke halaman 1 setiap kali filter atau search berubah
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filterTipe, filterKategori]);
 
   async function fetchTransaksi() {
     try {
@@ -92,7 +111,7 @@ export default function DaftarTransaksi() {
   async function handleDelete(id) {
     try {
       await axios.delete(`/api/transactions/${id}`, { withCredentials: true });
-      setTransaksi(transaksi.filter((t) => t.t_id !== id));
+      setTransaksi((prev) => prev.filter((t) => t.t_id !== id));
     } catch (error) {
       console.error("Gagal hapus transaksi:", error);
     }
@@ -102,14 +121,29 @@ export default function DaftarTransaksi() {
     setSelectedTransaksi(transaksi);
   }
 
-  function handleCloseModal() {
+  function deleteModal(transaksi) {
+    setDeleteTransaksi(transaksi);
+  }
+
+  function handleCloseEditModal() {
     setSelectedTransaksi(null);
+  }
+
+  function handleCloseDeleteModal() {
+    setDeleteTransaksi(null);
   }
 
   function handleEditSuccess() {
     fetchTransaksi();
   }
 
+  // update state lokal langsung stlh delete tanpa fetch ulang
+  function handleDeleteSuccess(id) {
+    setTransaksi((prev) => prev.filter((t) => t.t_id !== id));
+    setDeleteTransaksi(null);
+  }
+
+  // filter data berdasarkan search, tipe, dan kategori
   const filtered = transaksi.filter((t) => {
     const matchSearch =
       t.category.toLowerCase().includes(search.toLowerCase()) ||
@@ -126,10 +160,16 @@ export default function DaftarTransaksi() {
     return matchSearch && matchTipe && matchKategori;
   });
 
+  // hitung total halaman dan slice data sesuai halaman aktif
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+  const paginated = filtered.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE,
+  );
+
   return (
     <div className="min-h-screen bg-[#EDECEA]">
       <Navbar activePage="transaksi" />
-
       <main className="px-4 md:px-6 py-6 max-w-5xl mx-auto pb-24 md:pb-6">
         <h1 className="text-[#5BB77B] font-black text-2xl md:text-3xl mb-6">
           DAFTAR TRANSAKSI
@@ -150,8 +190,7 @@ export default function DaftarTransaksi() {
           <select
             value={filterTipe}
             onChange={(e) => setFilterTipe(e.target.value)}
-            className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#5BB77B]/40 cursor-pointer"
-          >
+            className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#5BB77B]/40 cursor-pointer">
             <option>Semua</option>
             <option>Pemasukkan</option>
             <option>Pengeluaran</option>
@@ -160,8 +199,7 @@ export default function DaftarTransaksi() {
           <select
             value={filterKategori}
             onChange={(e) => setFilterKategori(e.target.value)}
-            className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#5BB77B]/40 cursor-pointer"
-          >
+            className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#5BB77B]/40 cursor-pointer">
             {kategoriOptions.map((k) => (
               <option key={k}>{k}</option>
             ))}
@@ -179,12 +217,12 @@ export default function DaftarTransaksi() {
         ) : (
           <>
             <div className="md:hidden flex flex-col gap-3">
-              {filtered.map((t) => (
+              {paginated.map((t) => (
                 <TransaksiCard
                   key={t.t_id}
                   transaksi={t}
                   showActions={true}
-                  onDelete={handleDelete}
+                  onDelete={deleteModal}
                   onEdit={handleEdit}
                 />
               ))}
@@ -214,11 +252,11 @@ export default function DaftarTransaksi() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((t) => (
+                {paginated.map((t) => (
                   <TransaksiRow
                     key={t.t_id}
                     transaksi={t}
-                    onDelete={handleDelete}
+                    onDelete={deleteModal}
                     onEdit={handleEdit}
                   />
                 ))}
@@ -231,9 +269,40 @@ export default function DaftarTransaksi() {
       {selectedTransaksi && (
         <EditModal
           transaksi={selectedTransaksi}
-          onClose={handleCloseModal}
+          onClose={handleCloseEditModal}
           onSuccess={handleEditSuccess}
         />
+      )}
+
+      {deleteTransaksi && (
+        <ConfirmDeleteModal
+          transaksi={deleteTransaksi}
+          onClose={handleCloseDeleteModal}
+          onSuccess={handleDeleteSuccess}
+        />
+      )}
+
+      {/* pagination */}
+      {!loading && filtered.length > 0 && (
+        <div className="flex justify-center items-center gap-4 mt-6 pb-6">
+          <button
+            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+            disabled={currentPage === 1}
+            className="text-gray-500 hover:text-gray-700 transition-colors disabled:text-gray-300 disabled:cursor-not-allowed">
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+
+          <span className="text-sm text-gray-700">
+            {currentPage} / {totalPages}
+          </span>
+
+          <button
+            onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+            disabled={currentPage === totalPages}
+            className="text-gray-500 hover:text-gray-700 transition-colors disabled:text-gray-300 disabled:cursor-not-allowed">
+            <ChevronRight className="h-5 w-5" />
+          </button>
+        </div>
       )}
     </div>
   );

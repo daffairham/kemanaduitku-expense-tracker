@@ -15,8 +15,7 @@ export default function LandingPage() {
       </p>
       <Link
         to="/daftar"
-        className="bg-[#5BB77B] text-white text-xl px-6 py-3 rounded-full font-medium shadow-lg mb-4 hover:cursor-pointer hover:bg-[#399c5c] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-      >
+        className="bg-[#5BB77B] text-white text-xl px-6 py-3 rounded-full font-medium shadow-lg mb-4 hover:cursor-pointer hover:bg-[#399c5c] transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
         Daftar Sekarang
       </Link>
       <p className="font-light">

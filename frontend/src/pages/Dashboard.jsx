@@ -17,16 +17,21 @@ function SummaryCard({ label, amount, bgColor }) {
   );
 }
 
+function formatTanggal(dateStr) {
+  if (!dateStr) return "";
+  const [year, month, day] = dateStr.slice(0, 10).split("-");
+  return `${day}-${month}-${year}`;
+}
+
 function TransaksiRow({ transaksi }) {
   const isIncome = transaksi.type === "income";
   return (
     <tr className="border-b border-gray-200 last:border-0">
       <td className="py-4 pr-4 text-sm text-gray-700 whitespace-nowrap">
-        {transaksi.transaction_date?.split("T")[0]}
+        {formatTanggal(transaksi.transaction_date)}
       </td>
       <td
-        className={`py-4 pr-4 text-sm font-semibold whitespace-nowrap ${isIncome ? "text-[#5BB77B]" : "text-orange-400"}`}
-      >
+        className={`py-4 pr-4 text-sm font-semibold whitespace-nowrap ${isIncome ? "text-[#5BB77B]" : "text-orange-400"}`}>
         {isIncome ? "Pemasukkan" : "Pengeluaran"}
       </td>
       <td className="py-4 pr-4 text-sm font-medium text-gray-800">
@@ -111,8 +116,7 @@ export default function Dashboard() {
             </h2>
             <Link
               to="/tambah-transaksi"
-              className="bg-[#5BB77B] hover:bg-[#399c5c] transition-colors text-white text-sm font-medium px-4 py-2 rounded-lg"
-            >
+              className="bg-[#5BB77B] hover:bg-[#399c5c] transition-colors text-white text-sm font-medium px-4 py-2 rounded-lg">
               + Tambah Transaksi
             </Link>
           </div>
@@ -169,8 +173,7 @@ export default function Dashboard() {
           <div className="mt-4 text-right">
             <Link
               to="/transaksi"
-              className="text-sm text-[#5BB77B] hover:underline"
-            >
+              className="text-sm text-[#5BB77B] hover:underline">
               Lihat daftar transaksi lengkap →
             </Link>
           </div>

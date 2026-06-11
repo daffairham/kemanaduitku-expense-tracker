@@ -11,6 +11,17 @@ const getTransactions = async (req, res) => {
   }
 };
 
+const getTransactionsAsc = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const getUserTrx = await trxModel.getTransactionsAsc(userId);
+    return res.json({ getUserTrx });
+  } catch (error) {
+    return res.json({ message: error.message });
+  }
+};
+
 const inputTransaction = async (req, res) => {
   try {
     const userId = req.user.id;

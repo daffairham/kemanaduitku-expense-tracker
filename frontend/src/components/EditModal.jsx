@@ -4,7 +4,6 @@ import axios from "axios";
 
 const kategoriOptions = [
   "Gaji",
-  "Freelance",
   "Makanan",
   "Transportasi",
   "Hiburan",
@@ -80,18 +79,15 @@ export default function EditModal({ transaksi, onClose, onSuccess }) {
   return (
     <div
       className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center px-4"
-      onClick={onClose}
-    >
+      onClick={onClose}>
       <div
         className="bg-white rounded-xl shadow-lg w-full max-w-md p-6 relative"
-        onClick={(e) => e.stopPropagation()}
-      >
+        onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-lg font-bold text-[#5BB77B]">EDIT TRANSAKSI</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-red-500 transition-colors hover:cursor-pointer"
-          >
+            className="text-gray-400 hover:text-red-500 transition-colors hover:cursor-pointer">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -118,8 +114,7 @@ export default function EditModal({ transaksi, onClose, onSuccess }) {
               name="tipe"
               value={formData.tipe}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#5BB77B] bg-white"
-            >
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#5BB77B] bg-white">
               <option value="">Pilih tipe</option>
               <option value="income">Pemasukkan</option>
               <option value="expense">Pengeluaran</option>
@@ -134,8 +129,7 @@ export default function EditModal({ transaksi, onClose, onSuccess }) {
               name="kategori"
               value={formData.kategori}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#5BB77B] bg-white"
-            >
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#5BB77B] bg-white">
               <option value="">Pilih kategori</option>
               {kategoriOptions.map((k) => (
                 <option key={k} value={k}>
@@ -181,15 +175,13 @@ export default function EditModal({ transaksi, onClose, onSuccess }) {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 border border-gray-300 text-gray-600 hover:text-white hover:bg-red-500 cursor-pointer transition-colors font-medium py-2 rounded-lg text-sm"
-            >
+              className="flex-1 border border-gray-300 text-gray-600  hover:bg-gray-400 cursor-pointer transition-colors font-medium py-2 rounded-lg text-sm">
               Batal
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-[#5BB77B] hover:bg-[#399c5c] transition-colors cursor-pointer text-white font-medium py-2 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-            >
+              className="flex-1 bg-[#5BB77B] hover:bg-[#399c5c] transition-colors cursor-pointer text-white font-medium py-2 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed">
               {loading ? "Menyimpan..." : "Simpan"}
             </button>
           </div>
