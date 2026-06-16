@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import api from "../services/api";
 import Navbar from "../components/Navbar";
 import TransaksiCard from "../components/TransaksiCard";
 
@@ -60,8 +60,8 @@ export default function Dashboard() {
     async function fetchData() {
       try {
         const [trxRes, summaryRes] = await Promise.all([
-          axios.get("/api/transactions", { withCredentials: true }),
-          axios.get("/api/transactions/summary", { withCredentials: true }),
+          api.get("/api/transactions"),
+          api.get("/api/transactions/summary"),
         ]);
 
         setTransaksi(trxRes.data.getUserTrx);

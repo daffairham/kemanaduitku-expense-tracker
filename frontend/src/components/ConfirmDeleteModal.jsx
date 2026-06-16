@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { X, Trash2 } from "lucide-react";
-import axios from "axios";
+import api from "../services/api";
 
 export default function ConfirmDeleteModal({ transaksi, onClose, onSuccess }) {
   const [loading, setLoading] = useState(false);
@@ -9,7 +9,7 @@ export default function ConfirmDeleteModal({ transaksi, onClose, onSuccess }) {
   async function handleDelete() {
     setLoading(true);
     try {
-      await axios.delete(`/api/transactions/${transaksi.t_id}`, {
+      await api.delete(`/api/transactions/${transaksi.t_id}`, {
         withCredentials: true,
       });
       onSuccess(transaksi.t_id);

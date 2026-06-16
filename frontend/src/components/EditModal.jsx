@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
-import axios from "axios";
+import api from "../services/api";
 
 const kategoriOptions = [
   "Gaji",
@@ -55,17 +55,13 @@ export default function EditModal({ transaksi, onClose, onSuccess }) {
     setLoading(true);
 
     try {
-      await axios.put(
-        `/api/transactions/${transaksi.t_id}`,
-        {
-          date: formData.tanggal,
-          type: formData.tipe,
-          category: formData.kategori,
-          amount: Number(formData.jumlah),
-          description: formData.deskripsi,
-        },
-        { withCredentials: true },
-      );
+      await api.put(`/api/transactions/${transaksi.t_id}`, {
+        date: formData.tanggal,
+        type: formData.tipe,
+        category: formData.kategori,
+        amount: Number(formData.jumlah),
+        description: formData.deskripsi,
+      });
 
       onSuccess();
       onClose();

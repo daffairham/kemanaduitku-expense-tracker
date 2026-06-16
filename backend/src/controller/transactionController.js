@@ -1,5 +1,29 @@
 const trxModel = require("../models/transactionModel");
 
+const VALID_TYPES = ["income", "expense"];
+const VALID_KATEGORI = [
+  "Gaji",
+  "Makanan",
+  "Transportasi",
+  "Hiburan",
+  "Kesehatan",
+  "Pendidikan",
+  "Lainnya",
+];
+
+//validasi value input transaksi
+function validateTransaksiBody({ amount, type, category, date }) {
+  if (!date) return "Tanggal transaksi wajib diisi.";
+  if (!VALID_TYPES.includes(type)) return "Tipe transaksi tidak valid.";
+  if (!VALID_KATEGORI.includes(category)) return "Kategori tidak valid.";
+
+  const numAmount = Number(amount);
+  if (isNaN(numAmount) || numAmount <= 0)
+    return "Jumlah harus berupa angka positif.";
+
+  return null; // null = valid
+}
+
 const getTransactions = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -25,23 +49,30 @@ const getTransactionsAsc = async (req, res) => {
 const inputTransaction = async (req, res) => {
   try {
     const userId = req.user.id;
-    const amount = req.body.amount;
-    const type = req.body.type;
-    const category = req.body.category;
-    const description = req.body.description;
-    const date = req.body.date;
+    const { amount, type, category, description, date } = req.body;
 
-    const inputToDb = await trxModel.inputTransaction(
-      userId,
+    const validationError = validateTransaksiBody({
       amount,
+      type,
+      category,
+      date,
+    });
+    if (validationError) {
+      return res.status(400).json({ message: validationError });
+    }
+
+    await trxModel.inputTransaction(
+      userId,
+      Number(amount),
       type,
       category,
       description,
       date,
     );
+
     return res.json({ message: "Data berhasil diinput." });
   } catch (error) {
-    return res.json({ message: error.message });
+    return res.status(500).json({ message: error.message });
   }
 };
 
@@ -67,24 +98,35 @@ const updateTransaction = async (req, res) => {
   try {
     const trxId = req.params.id;
     const userId = req.user.id;
-    const amount = req.body.amount;
-    const type = req.body.type;
-    const category = req.body.category;
-    const description = req.body.description;
-    const transactionDate = req.body.date;
+    const { amount, type, category, description, date } = req.body;
+
+    const validationError = validateTransaksiBody({
+      amount,
+      type,
+      category,
+      date,
+    });
+    if (validationError) {
+      return res.status(400).json({ message: validationError });
+    }
 
     const updateData = await trxModel.updateTransaction(
       trxId,
       userId,
-      amount,
+      Number(amount),
       type,
       category,
       description,
-      transactionDate,
+      date,
     );
+
+    if (!updateData) {
+      return res.status(404).json({ message: "Transaksi tidak ditemukan." });
+    }
+
     return res.json({ message: "Data transaksi berhasil diperbarui." });
   } catch (error) {
-    return res.json({ message: error.message });
+    return res.status(500).json({ message: error.message });
   }
 };
 

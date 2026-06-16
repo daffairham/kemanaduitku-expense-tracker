@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import axios from "axios";
+import api from "../services/api";
 
 export default function GuestRoute({ children }) {
   const [status, setStatus] = useState("loading");
 
   useEffect(() => {
-    axios
-      .get("/api/auth/me", { withCredentials: true })
+    api
+      .get("/api/auth/me")
       .then(() => setStatus("auth"))
       .catch(() => setStatus("unauth"));
   }, []);

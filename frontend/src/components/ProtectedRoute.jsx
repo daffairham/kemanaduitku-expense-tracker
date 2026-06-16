@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import axios from "axios";
+import api from "../services/api";
 
 export default function ProtectedRoute({ children }) {
   const [status, setStatus] = useState("loading"); // "loading" | "auth" | "unauth"
 
   useEffect(() => {
-    axios
-      .get("http://localhost:5000/api/auth/me", { withCredentials: true })
+    api
+      .get("/api/auth/me")
       .then(() => setStatus("auth"))
       .catch(() => setStatus("unauth"));
   }, []);

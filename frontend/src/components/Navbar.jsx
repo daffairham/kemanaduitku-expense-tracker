@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { LayoutDashboard, List, Plus, LogOut } from "lucide-react";
-import axios from "axios";
+import api from "../services/api";
 
 const navItems = [
   {
@@ -30,7 +30,7 @@ export default function Navbar({ activePage }) {
   useEffect(() => {
     async function fetchUser() {
       try {
-        const res = await axios.get("/api/auth/me", {
+        const res = await api.get("/api/auth/me", {
           withCredentials: true,
         });
 
@@ -44,7 +44,7 @@ export default function Navbar({ activePage }) {
   }, []);
   async function handleLogout() {
     try {
-      await axios.post("/api/auth/logout", {}, { withCredentials: true });
+      await api.post("/api/auth/logout", {});
     } catch (err) {
     } finally {
       navigate("/masuk");

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../services/api";
 import HeroSlogan from "../components/HeroSlogan";
 import Button from "../components/Button";
 
@@ -24,14 +24,10 @@ export default function Masuk() {
     setLoading(true);
 
     try {
-      await axios.post(
-        "/api/auth/login",
-        {
-          email: formData.email,
-          password: formData.sandi,
-        },
-        { withCredentials: true },
-      );
+      await api.post("/api/auth/login", {
+        email: formData.email,
+        password: formData.sandi,
+      });
 
       navigate("/dashboard");
     } catch (err) {

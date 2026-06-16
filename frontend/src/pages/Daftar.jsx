@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../services/api";
 import HeroSlogan from "../components/HeroSlogan";
 import Button from "../components/Button";
 
@@ -25,7 +25,7 @@ export default function Daftar() {
     setLoading(true);
 
     try {
-      await axios.post("/api/auth/register", {
+      await api.post("/api/auth/register", {
         name: formData.nama,
         email: formData.email,
         password: formData.sandi,

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../services/api";
 import Navbar from "../components/Navbar";
 
 const kategoriOptions = [
@@ -48,18 +48,13 @@ export default function TambahTransaksi() {
     setLoading(true);
 
     try {
-      await axios.post(
-        "/api/transactions",
-        {
-          date: formData.tanggal,
-          type: formData.tipe,
-          category: formData.kategori,
-          amount: Number(formData.jumlah),
-          description: formData.deskripsi,
-        },
-        { withCredentials: true },
-      );
-
+      await api.post("/api/transactions", {
+        date: formData.tanggal,
+        type: formData.tipe,
+        category: formData.kategori,
+        amount: Number(formData.jumlah),
+        description: formData.deskripsi,
+      });
       navigate("/transaksi");
     } catch (err) {
       setError(
