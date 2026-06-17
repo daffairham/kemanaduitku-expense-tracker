@@ -7,10 +7,10 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 
 const app = express();
-const authenticateUser = require("./middleware/authMiddleware");
-const authRoutes = require("./routes/authRoutes");
-const trxRoutes = require("./routes/transactionRoutes");
-const homeRoutes = require("./routes/homeRoutes");
+const authenticateUser = require("./src/middleware/authMiddleware");
+const authRoutes = require("./src/routes/authRoutes");
+const trxRoutes = require("./src/routes/transactionRoutes");
+const homeRoutes = require("./src/routes/homeRoutes");
 
 app.use(
   cors({
