@@ -14,7 +14,7 @@ const homeRoutes = require("./routes/homeRoutes");
 
 app.use(
   cors({
-    origin: "http://localhost:8000",
+    origin: process.env.CLIENT_URL,
     credentials: true,
   }),
 );
@@ -34,5 +34,3 @@ const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`Server jalan di PORT ${PORT}`);
 });
-
-module.exports = app;

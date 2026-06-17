@@ -6,9 +6,6 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
   server: {
     port: 8000,
-    proxy: {
-      "/api": "http://localhost:5000",
-    },
   },
   plugins: [react(), tailwindcss()],
 });
