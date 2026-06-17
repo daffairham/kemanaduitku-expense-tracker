@@ -48,6 +48,6 @@ git clone https://github.com/daffairham/kemanaduitku-expense-tracker
 
 ## Live Link
 
-COMING SOON
+(https://kemanaduitku.vercel.app/)
 
 
